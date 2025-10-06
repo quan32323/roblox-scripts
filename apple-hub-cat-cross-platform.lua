@@ -1,13 +1,4 @@
 -- Apple Hub Cat Việt Hóa by Quân - Bản Cross-Platform Chuối Xịn
-if getgenv().Key ~= "applepremium" then
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Apple Hub Cat",
-        Text = "Key sai! Nhập 'applepremium' để kích hoạt.",
-        Duration = 3
-    })
-    return
-end
-
 local Settings = {
     AutoFarmLevel = false,
     AutoQuest = false,
@@ -15,6 +6,13 @@ local Settings = {
     AntiBan = true,
     Translator = true
 }
+
+local validKeys = { -- Danh sách key hợp lệ, bạn tự thêm
+    "key1-xin123",
+    "key2-chuoi456",
+    "key3-premium789"
+}
+getgenv().ActivatedKey = nil -- Lưu key đã kích hoạt
 
 local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
@@ -96,16 +94,61 @@ for i, btn in pairs(tabButtons) do
     btn.button = button
 end
 
-local homeLabel = Instance.new("TextLabel")
-homeLabel.Size = UDim2.new(0, 360, 0, 200)
-homeLabel.Position = UDim2.new(0, 10, 0, 10)
-homeLabel.BackgroundTransparency = 1
-homeLabel.Text = "Apple Hub Cat - Premium\nKey: applepremium\nStatus: Activated"
-homeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-homeLabel.TextWrapped = true
-homeLabel.TextScaled = true
-homeLabel.Font = Enum.Font.Gotham
-homeLabel.Parent = tabs.Home
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(0, 360, 0, 40)
+keyBox.Position = UDim2.new(0, 10, 0, 10)
+keyBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+keyBox.Text = ""
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.TextScaled = true
+keyBox.Font = Enum.Font.Gotham
+keyBox.PlaceholderText = "Nhập key của bạn..."
+keyBox.Parent = tabs.Home
+
+local activateBtn = Instance.new("TextButton")
+activateBtn.Size = UDim2.new(0, 360, 0, 40)
+activateBtn.Position = UDim2.new(0, 10, 0, 60)
+activateBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+activateBtn.Text = "Activate Key"
+activateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+activateBtn.TextScaled = true
+activateBtn.Parent = tabs.Home
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0, 360, 0, 40)
+statusLabel.Position = UDim2.new(0, 10, 0, 110)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Status: Chưa kích hoạt"
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.TextScaled = true
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Parent = tabs.Home
+
+activateBtn.MouseButton1Click:Connect(function()
+    local enteredKey = keyBox.Text
+    if table.find(validKeys, enteredKey) then
+        getgenv().ActivatedKey = enteredKey
+        statusLabel.Text = "Status: Kích hoạt thành công với key " .. enteredKey
+        statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        if Settings.Translator then
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Apple Hub Cat",
+                Text = "Key " .. enteredKey .. " đã được kích hoạt!",
+                Duration = 3
+            })
+        end
+    else
+        statusLabel.Text = "Status: Key sai hoặc không hợp lệ"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        if Settings.Translator then
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Apple Hub Cat",
+                Text = "Key sai! Vui lòng thử lại.",
+                Duration = 3
+            })
+        end
+    end
+end)
 
 local autoFarmBtn = Instance.new("TextButton")
 autoFarmBtn.Size = UDim2.new(0, 360, 0, 40)
@@ -279,11 +322,12 @@ addHoverEffect(teleportBtn)
 addHoverEffect(antiBanBtn)
 addHoverEffect(translatorBtn)
 addHoverEffect(closeBtn)
+addHoverEffect(activateBtn)
 
-if Settings.Translator then
+if Settings.Translator and not getgenv().ActivatedKey then
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "Apple Hub Cat",
-        Text = "Premium Edition activated with key 'applepremium'.",
+        Text = "Vui lòng nhập và kích hoạt key trong tab Home!",
         Duration = 3
     })
 end
