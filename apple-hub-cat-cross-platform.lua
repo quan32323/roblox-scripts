@@ -1,5 +1,5 @@
 ```lua
--- Apple Hub Cat Việt Hóa by Quân - Bản Cross-Platform Chuối Xịn, phong cách Premium
+-- Apple Hub Cat Việt Hóa by Quân - Bản Cross-Platform Chuối Xịn, key từ Linkvertise/LootLabs
 local Settings = {
     AutoFarmLevel = false,
     AutoQuest = false,
@@ -20,13 +20,36 @@ gui.Name = "AppleHubCatPremium"
 gui.Parent = player.PlayerGui
 gui.ResetOnSpawn = false
 
--- Menu chính với UI đẹp hơn
+-- Kiểm tra key từ Linkvertise
+local function getKeyFromLinkvertise()
+    local success, response = pcall(function()
+        return game:HttpGet("https://publisher.linkvertise.com/api/v1/redirect/link/YOUR_LINK_ID/check?serial=123456") -- Thay YOUR_LINK_ID bằng ID link của bạn
+    end)
+    if success then
+        -- Parse response để lấy key (giả lập, cần điều chỉnh theo API Linkvertise)
+        local key = response:match("key=(%w+)") or "applepremium123" -- Ví dụ key trong response
+        return key
+    end
+    return nil
+end
+
+local fetchedKey = getKeyFromLinkvertise()
+if not fetchedKey or fetchedKey ~= "applepremium123" then -- Thay "applepremium123" bằng key bạn định nghĩa
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Apple Hub Cat",
+        Text = "Key từ Linkvertise không hợp lệ! Hoàn thành task để lấy key.",
+        Duration = 5
+    })
+    return
+end
+
+-- Menu chính với UI đẹp
 local isMobile = game:GetService("UserInputService").TouchEnabled
 local sizeX, sizeY = if isMobile then 320 else 400
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, sizeX, 0, sizeY)
 frame.Position = UDim2.new(0.5, -sizeX/2, 0.5, -sizeY/2)
-frame.BackgroundColor3 = Color3.fromRGB(20, 30, 50) -- Xanh đậm
+frame.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
 local uigradient = Instance.new("UIGradient")
 uigradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 30, 50)),
@@ -47,7 +70,7 @@ title.Size = UDim2.new(0, sizeX - 20, 0, 40)
 title.Position = UDim2.new(0, 10, 0, 10)
 title.BackgroundTransparency = 1
 title.Text = "Apple Hub Cat - Premium"
-title.TextColor3 = Color3.fromRGB(0, 191, 255) -- Xanh dương sáng
+title.TextColor3 = Color3.fromRGB(0, 191, 255)
 title.TextScaled = true
 title.Font = Enum.Font.GothamBold
 title.Parent = frame
@@ -88,7 +111,7 @@ for i, btn in pairs(tabButtons) do
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(0, 60, 0, 30)
     button.Position = btn.pos
-    button.BackgroundColor3 = Color3.fromRGB(40, 60, 90) -- Xanh đậm
+    button.BackgroundColor3 = Color3.fromRGB(40, 60, 90)
     local btnGradient = Instance.new("UIGradient")
     btnGradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 60, 90)),
@@ -96,7 +119,7 @@ for i, btn in pairs(tabButtons) do
     }
     btnGradient.Parent = button
     button.Text = btn.name
-    button.TextColor3 = Color3.fromRGB(255, 215, 0) -- Vàng
+    button.TextColor3 = Color3.fromRGB(255, 215, 0)
     button.TextScaled = true
     button.Parent = frame
     button.MouseButton1Click:Connect(function()
@@ -307,28 +330,6 @@ translatorBtn.TextColor3 = Color3.fromRGB(255, 215, 0)
 translatorBtn.TextScaled = true
 translatorBtn.Parent = tabs.Settings
 
--- Kiểm tra key từ server
-local function verifyKey(key)
-    local success, response = pcall(function()
-        return game:HttpGet("https://your-server.com/verify?key=" .. key .. "&user=" .. player.UserId .. "&time=" .. os.time())
-    end)
-    if success and response and response:match("valid") then
-        local ttl = tonumber(response:match("ttl=(%d+)")) or 3600
-        getgenv().KeyTTL = os.time() + ttl
-        return true
-    end
-    return false
-end
-
-if not getgenv().Key or not verifyKey(getgenv().Key) then
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Apple Hub Cat",
-        Text = "Key sai hoặc hết hạn! Dùng key hợp lệ từ server.",
-        Duration = 3
-    })
-    return
-end
-
 -- Anti-ban
 local function checkAntiCheat()
     if player.Character and player.Character:FindFirstChild("Humanoid") then
@@ -510,7 +511,7 @@ autoFarmBtn.MouseButton1Click:Connect(function()
                 for _, v in pairs(game.Workspace:GetDescendants()) do
                     if v:IsA("Model") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 and v ~= player.Character then
                         local distance = (player.Character.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude
-                        if distance <= 30 and v.Humanoid.MaxHealth > maxHealth and v.Humanoid.MaxHealth >= level * 10 then -- Ưu tiên mob mạnh
+                        if distance <= 30 and v.Humanoid.MaxHealth > maxHealth and v.Humanoid.MaxHealth >= level * 10 then
                             maxHealth = v.Humanoid.MaxHealth
                             targetMob = v
                         end
@@ -519,7 +520,6 @@ autoFarmBtn.MouseButton1Click:Connect(function()
                 if targetMob then
                     player.Character.HumanoidRootPart.CFrame = CFrame.new(targetMob.HumanoidRootPart.Position + Vector3.new(0, 5, 0))
                     game:GetService("VirtualUser"):ClickButton1(Vector2.new(0, 0))
-                    -- Né đòn cơ bản
                     if math.random(1, 10) == 1 then
                         player.Character.Humanoid.Jump = true
                         wait(0.1)
@@ -528,7 +528,7 @@ autoFarmBtn.MouseButton1Click:Connect(function()
                     local npcPos = getQuestNPC(level)
                     player.Character.HumanoidRootPart.CFrame = CFrame.new(npcPos + Vector3.new(0, 5, 0))
                 end
-                wait(Settings.AntiBan and 0.3 or 0.1) -- Tăng tốc độ farm
+                wait(Settings.AntiBan and 0.3 or 0.1)
             end
         end)
     else
@@ -814,7 +814,7 @@ local function addHoverEffect(button)
         glow.Size = UDim2.new(0, button.Size.X.Offset + 20, 0, button.Size.Y.Offset + 20)
         glow.Position = UDim2.new(0, -10, 0, -10)
         glow.BackgroundTransparency = 1
-        glow.Image = "rbxassetid://5028857472" -- Hiệu ứng glow
+        glow.Image = "rbxassetid://5028857472"
         glow.ImageColor3 = Color3.fromRGB(0, 191, 255)
         glow.ImageTransparency = 0.7
         glow.Parent = button
@@ -844,7 +844,7 @@ addHoverEffect(closeBtn)
 if getgenv().AppleHubCat and Settings.Translator then
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "Apple Hub Cat",
-        Text = "Premium Edition activated with key " .. (getgenv().Key or "unknown") .. ".",
+        Text = "Premium Edition activated with key from Linkvertise.",
         Duration = 3
     })
 end
